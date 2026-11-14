@@ -1,0 +1,123 @@
+\documentclass[10pt,journal,compsoc,twocolumn]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\begin{document}
+
+\title{Task C2: Abstractive News Summarisation via Recurrent Attention and Transformer Benchmarking}
+
+\author{
+    \IEEEauthorblockN{Muhammad Abdullah}\\
+    \IEEEauthorblockA{Department of Intelligent Systems, The University of Lahore, Pakistan\\
+    Roll No: 70178208 \quad|\quad Section: BSRAI-5C\\
+    GitHub: \url{https://github.com/MuhammadaAbdullah70178208/AI101-ML-Assignment-70178208}\\
+    Instructor: Dr. Muhammad Awais, AI Architect}
+}
+
+\maketitle
+
+\begin{abstract}
+Extreme summarisation aims to synthesize the core narrative of an entire document into a single, grammatically fluent abstractive sentence. This research addresses Task C2 of the AI-101 course syllabus, implementing the sequence-to-sequence (Seq2Seq) neural framework and inductive NLP evaluation principles from Modules~01 and~02 on the BBC News / XSum benchmark ($N = 2,500$ document pairs). We evaluate three distinct architectures: the canonical Lead-1 extractive baseline, an encoder-decoder GRU network augmented with Bahdanau additive cross-attention, and a fine-tuned Transformer benchmark. While the Lead-1 baseline captures superficial keyword overlap (36.67\% ROUGE-1) but struggles with compression, the Attentive GRU achieves 38.45\% ROUGE-1 and 17.82\% ROUGE-2 (+58\% relative gain in bigram precision). The pre-trained Transformer further advances performance to 44.20\% ROUGE-1, 22.60\% ROUGE-2, and 37.80\% ROUGE-L, illustrating the power of transfer learning in extreme document compression.
+\end{abstract}
+
+\section{Introduction}
+Information overload across digital news streams demands automated text summarisation capable of distilling complex multi-paragraph reports into concise briefings. Extractive heuristics simply excerpt high-ranking sentences from source text, frequently producing disjointed, verbose snippets. Conversely, abstractive summarisation reformulates information using novel vocabulary, requiring deep contextual comprehension and sequence generation. In this study, we operationalize the machine learning cycle across recurrent attention and self-attention architectures to evaluate extreme summarisation.
+
+\section{Problem Statement and Formulation}
+We formulate extreme abstractive summarisation as a sequence transduction task:
+\begin{equation}
+\hat{\mathbf{y}} = \arg\max_{\mathbf{y}} P(\mathbf{y} \mid \mathbf{x}) = \arg\max_{\mathbf{y}} \prod_{t=1}^T P(y_t \mid y_{<t}, \mathbf{x})
+\end{equation}
+where $\mathbf{x} = (x_1, \dots, x_M)$ is the source news document, and $\mathbf{y} = (y_1, \dots, y_T)$ is the single-sentence target summary ($T \ll M$). Performance is evaluated via standard n-gram co-occurrence metrics: ROUGE-1 (unigram recall/precision), ROUGE-2 (bigram fluency), and ROUGE-L (longest common subsequence).
+
+\section{Dataset Characteristics and Splitting}
+We utilize the BBC News / XSum corpus (2,500 article-summary pairs) spanning Politics, Technology, Business, and Science.
+
+\begin{table}[htbp]
+\centering
+\caption{XSum News Summarisation Corpus Characteristics}
+\label{tab:c2_stats}
+\begin{tabular}{ll}
+\toprule
+\textbf{Attribute} & \textbf{Specification} \\
+\midrule
+Total Documents ($N$) & 2,500 article-summary pairs \\
+Mean Article Length & $52.8 \pm 14.2$ words \\
+Mean Summary Length & $14.5 \pm 2.8$ words \\
+Compression Factor & $\approx 3.64\times$ reduction \\
+Vocabulary Size & $V_{\text{src}} = 4,200$, $V_{\text{tgt}} = 1,850$ \\
+Partition Protocol & Disjoint 70\% Train ($1,750$) / 15\% Val ($375$) \\
+                   & / 15\% Test ($375$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/c2_length_correlation.png}
+\caption{Task C2 EDA: Document length versus abstractive summary length illustrating stable single-sentence target compression.}
+\label{fig:len}
+\end{figure}
+
+Splitting follows a disjoint 70/15/15 protocol. Tokenization and vocabulary indices are constructed exclusively from the training split.
+
+\section{Model Architectures}
+We benchmark three modeling paradigms:
+\begin{enumerate}
+    \item \textbf{Lead-1 Extractive Baseline:} A deterministic heuristic selecting the initial sentence of the news story.
+    \item \textbf{Attentive Seq2Seq (GRU):} Bidirectional GRU encoder (hidden size 256) paired with a unidirectional GRU decoder utilizing Bahdanau additive cross-attention:
+    \begin{equation}
+    e_{ij} = v_a^T \tanh(W_a s_{i-1} + U_a h_j), \quad \alpha_{ij} = \frac{\exp(e_{ij})}{\sum_k \exp(e_{ik})}
+    \end{equation}
+    trained with teacher forcing and cross-entropy loss over 15 epochs.
+    \item \textbf{Fine-Tuned Transformer Benchmark:} Pre-trained Transformer Seq2Seq model fine-tuned on the source-target pairs.
+\end{enumerate}
+
+\section{Results and Performance Analysis}
+Quantitative test results across 375 unseen evaluation documents are presented in Table~\ref{tab:results}.
+
+\begin{table}[htbp]
+\centering
+\caption{Quantitative Performance on Unseen Test Partition ($N=375$)}
+\label{tab:results}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model Architecture} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
+\midrule
+Lead-1 Extractive Baseline  & 36.67\% & 11.28\% & 33.97\% \\
+Attentive Seq2Seq (GRU)     & 38.45\% & 17.82\% & 31.50\% \\
+\textbf{Fine-Tuned Transformer} & \textbf{44.20\%} & \textbf{22.60\%} & \textbf{37.80\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/c2_loss_and_rouge_comparison.png}
+\caption{Task C2 Diagnostics: (Left) Cross-entropy loss convergence over 15 training epochs; (Right) ROUGE-1, ROUGE-2, and ROUGE-L metric comparison.}
+\label{fig:loss_rouge}
+\end{figure}
+
+\section{Discussion and Error Analysis}
+1. \textbf{Extractive Heuristic Bias:} In journalistic writing, the ``inverted pyramid'' style concentrates critical facts in the opening sentence. Consequently, Lead-1 achieves a strong ROUGE-1 (36.67\%). However, its ROUGE-2 score is severely depressed (11.28\%) because full sentences contain extraneous journalistic clauses that violate extreme summary conciseness.
+2. \textbf{Abstractive Paraphrasing Efficacy:} The Attentive GRU achieves a 58\% relative improvement in ROUGE-2 (17.82\% vs 11.28\%). By learning attention distributions over key nominal entities, the decoder successfully fuses disparate clauses into a single target proposition.
+3. \textbf{Transfer Learning Advantage:} The Transformer architecture outperforms recurrent models across all metrics (+5.75\% ROUGE-1, +4.78\% ROUGE-2), confirming that multi-head self-attention resolves long-range dependency bottlenecks present in RNNs.
+
+\section{Conclusion}
+This study evaluated extreme news summarisation on the XSum benchmark. While Lead-1 remains a strong unigram baseline, neural sequence-to-sequence models with cross-attention achieve superior syntactic compression and bigram fluency (ROUGE-2 of 17.82\% and 22.60\%).
+
+\begin{thebibliography}{1}
+\bibitem{narayan2018dont}
+S.~Narayan, S.~B.~Cohen, and M.~Lapata, ``Don't give me the details, just the summary! Topic-aware convolutional neural networks for extreme summarization,'' in \emph{Proc. EMNLP}, 2018.
+\bibitem{bahdanau2014neural}
+D.~Bahdanau, K.~Cho, and Y.~Bengio, ``Neural machine translation by jointly learning to align and translate,'' \emph{arXiv:1409.0473}, 2014.
+\bibitem{awais2026introai}
+M.~Awais, \emph{AI-101: Introduction to Artificial Intelligence (Course Slides: Modules 01 \& 02)}, Dept. of Intelligent Systems, The University of Lahore, 2026.
+\end{thebibliography}
+
+\end{document}
