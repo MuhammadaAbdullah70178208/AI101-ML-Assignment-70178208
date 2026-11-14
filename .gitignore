@@ -1,0 +1,22 @@
+# Python environment
+venv/
+env/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Large datasets and checkpoints (>50 MB rule)
+*.pt
+*.pth
+*.h5
+*.pkl
+*.bin
+data/*.tar.gz
+data/*.zip
+
+# Jupyter checkpoint files
+.ipynb_checkpoints/
+
+# OS specific files
+.DS_Store
+Thumbs.db
