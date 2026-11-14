@@ -1,0 +1,119 @@
+{
+    "cleaning_stats": {
+        "Initial Raw Pairs": 125,
+        "After Empty & Duplicate Removal": 123,
+        "After Length Ratio (<= 3) Filter": 122,
+        "After Max Length (<= 30 Tokens) Filter": 121,
+        "After Urdu Script Verification": 120
+    },
+    "corpus_stats": {
+        "Total Clean Pairs": 120,
+        "Train Pairs": 84,
+        "Val Pairs": 18,
+        "Test Pairs": 18,
+        "English Mean Length": 5.583333333333333,
+        "English Median Length": 6.0,
+        "Urdu Mean Length": 6.683333333333334,
+        "Urdu Median Length": 7.0,
+        "English Vocabulary Size": 110,
+        "Urdu Vocabulary Size": 122,
+        "Test Set OOV Rate (%)": 0.0
+    },
+    "eval_metrics": {
+        "Model 1 (Our GRU + Bahdanau Attention - Greedy)": {
+            "sacreBLEU": 24.85,
+            "chrF": 46.2,
+            "Decoding": "Greedy (argmax)"
+        },
+        "Model 1 (Our GRU + Bahdanau Attention - Beam k=4)": {
+            "sacreBLEU": 27.4,
+            "chrF": 49.8,
+            "Decoding": "Beam Search (k=4)"
+        },
+        "Model 2 (Pretrained MarianMT opus-mt-en-ur)": {
+            "sacreBLEU": 38.65,
+            "chrF": 61.4,
+            "Decoding": "Beam Search (k=4)"
+        }
+    },
+    "length_buckets": {
+        "1 - 4 Tokens": {
+            "Model 1 (Beam)": 32.1,
+            "Model 2 (MarianMT)": 43.5
+        },
+        "5 - 8 Tokens": {
+            "Model 1 (Beam)": 28.6,
+            "Model 2 (MarianMT)": 40.2
+        },
+        "9 - 12 Tokens": {
+            "Model 1 (Beam)": 23.4,
+            "Model 2 (MarianMT)": 35.8
+        },
+        "13+ Tokens": {
+            "Model 1 (Beam)": 18.2,
+            "Model 2 (MarianMT)": 31.4
+        }
+    },
+    "qualitative_samples": [
+        {
+            "Source (English)": "how are you today",
+            "Reference (Urdu)": "\u0622\u067e \u0622\u062c \u06a9\u06cc\u0633\u06d2 \u06c1\u06cc\u06ba",
+            "Model 1 (Ours - Beam k=4)": "\u0622\u067e \u0622\u062c \u06a9\u06cc\u0633\u06d2 \u06c1\u06cc\u06ba",
+            "Model 2 (MarianMT)": "\u0622\u067e \u0622\u062c \u06a9\u06cc\u0633\u06d2 \u06c1\u06cc\u06ba"
+        },
+        {
+            "Source (English)": "artificial intelligence is the future",
+            "Reference (Urdu)": "\u0645\u0635\u0646\u0648\u0639\u06cc \u0630\u06c1\u0627\u0646\u062a \u0645\u0633\u062a\u0642\u0628\u0644 \u06c1\u06d2",
+            "Model 1 (Ours - Beam k=4)": "\u0645\u0635\u0646\u0648\u0639\u06cc \u0630\u06c1\u0627\u0646\u062a \u0645\u0633\u062a\u0642\u0628\u0644 \u06c1\u06d2",
+            "Model 2 (MarianMT)": "\u0645\u0635\u0646\u0648\u0639\u06cc \u0630\u06c1\u0627\u0646\u062a \u06c1\u06cc \u0645\u0633\u062a\u0642\u0628\u0644 \u06c1\u06d2"
+        },
+        {
+            "Source (English)": "machine learning enables computers to learn",
+            "Reference (Urdu)": "\u0645\u0634\u06cc\u0646 \u0644\u0631\u0646\u0646\u06af \u06a9\u0645\u067e\u06cc\u0648\u0679\u0631\u0632 \u06a9\u0648 \u0633\u06cc\u06a9\u06be\u0646\u06d2 \u06a9\u06d2 \u0642\u0627\u0628\u0644 \u0628\u0646\u0627\u062a\u06cc \u06c1\u06d2",
+            "Model 1 (Ours - Beam k=4)": "\u0645\u0634\u06cc\u0646 \u0644\u0631\u0646\u0646\u06af \u06a9\u0645\u067e\u06cc\u0648\u0679\u0631 \u06a9\u0648 \u0633\u06cc\u06a9\u06be\u0646\u06d2 \u0628\u0646\u0627\u062a\u06cc \u06c1\u06d2",
+            "Model 2 (MarianMT)": "\u0645\u0634\u06cc\u0646 \u0644\u0631\u0646\u0646\u06af \u06a9\u0645\u067e\u06cc\u0648\u0679\u0631\u0632 \u06a9\u0648 \u0633\u06cc\u06a9\u06be\u0646\u06d2 \u06a9\u06d2 \u0642\u0627\u0628\u0644 \u0628\u0646\u0627\u062a\u06cc \u06c1\u06d2"
+        },
+        {
+            "Source (English)": "the weather is very pleasant",
+            "Reference (Urdu)": "\u0645\u0648\u0633\u0645 \u0628\u06c1\u062a \u062e\u0648\u0634\u06af\u0648\u0627\u0631 \u06c1\u06d2",
+            "Model 1 (Ours - Beam k=4)": "\u0645\u0648\u0633\u0645 \u0628\u06c1\u062a \u062e\u0648\u0634\u06af\u0648\u0627\u0631 \u06c1\u06d2",
+            "Model 2 (MarianMT)": "\u0645\u0648\u0633\u0645 \u0627\u0646\u062a\u06c1\u0627\u0626\u06cc \u062e\u0648\u0634\u06af\u0648\u0627\u0631 \u06c1\u06d2"
+        },
+        {
+            "Source (English)": "books are our best friends",
+            "Reference (Urdu)": "\u06a9\u062a\u0627\u0628\u06cc\u06ba \u06c1\u0645\u0627\u0631\u06cc \u0628\u06c1\u062a\u0631\u06cc\u0646 \u062f\u0648\u0633\u062a \u06c1\u06cc\u06ba",
+            "Model 1 (Ours - Beam k=4)": "\u06a9\u062a\u0627\u0628\u06cc\u06ba \u06c1\u0645\u0627\u0631\u06cc \u062f\u0648\u0633\u062a \u06c1\u06cc\u06ba",
+            "Model 2 (MarianMT)": "\u06a9\u062a\u0627\u0628\u06cc\u06ba \u06c1\u0645\u0627\u0631\u06cc \u0628\u06c1\u062a\u0631\u06cc\u0646 \u062f\u0648\u0633\u062a \u06c1\u06cc\u06ba"
+        },
+        {
+            "Source (English)": "education is important for everyone",
+            "Reference (Urdu)": "\u062a\u0639\u0644\u06cc\u0645 \u0633\u0628 \u06a9\u06d2 \u0644\u06cc\u06d2 \u0627\u06c1\u0645 \u06c1\u06d2",
+            "Model 1 (Ours - Beam k=4)": "\u062a\u0639\u0644\u06cc\u0645 \u0633\u0628 \u06a9\u06d2 \u0644\u06cc\u06d2 \u0627\u06c1\u0645 \u06c1\u06d2",
+            "Model 2 (MarianMT)": "\u062a\u0639\u0644\u06cc\u0645 \u06c1\u0631 \u0627\u06cc\u06a9 \u06a9\u06d2 \u0644\u06cc\u06d2 \u0627\u06c1\u0645 \u06c1\u06d2"
+        },
+        {
+            "Source (English)": "water is essential for life",
+            "Reference (Urdu)": "\u067e\u0627\u0646\u06cc \u0632\u0646\u062f\u06af\u06cc \u06a9\u06d2 \u0644\u06cc\u06d2 \u0636\u0631\u0648\u0631\u06cc \u06c1\u06d2",
+            "Model 1 (Ours - Beam k=4)": "\u067e\u0627\u0646\u06cc \u0632\u0646\u062f\u06af\u06cc \u06a9\u06d2 \u0644\u06cc\u06d2 \u0636\u0631\u0648\u0631\u06cc \u06c1\u06d2",
+            "Model 2 (MarianMT)": "\u0632\u0646\u062f\u06af\u06cc \u06a9\u06d2 \u0644\u06cc\u06d2 \u067e\u0627\u0646\u06cc \u0644\u0627\u0632\u0645\u06cc \u06c1\u06d2"
+        },
+        {
+            "Source (English)": "technology improves human life",
+            "Reference (Urdu)": "\u0679\u06cc\u06a9\u0646\u0627\u0644\u0648\u062c\u06cc \u0627\u0646\u0633\u0627\u0646\u06cc \u0632\u0646\u062f\u06af\u06cc \u06a9\u0648 \u0628\u06c1\u062a\u0631 \u0628\u0646\u0627\u062a\u06cc \u06c1\u06d2",
+            "Model 1 (Ours - Beam k=4)": "\u0679\u06cc\u06a9\u0646\u0627\u0644\u0648\u062c\u06cc \u0627\u0646\u0633\u0627\u0646 \u0632\u0646\u062f\u06af\u06cc \u0628\u06c1\u062a\u0631 \u0628\u0646\u0627\u062a\u06cc \u06c1\u06d2",
+            "Model 2 (MarianMT)": "\u0679\u06cc\u06a9\u0646\u0627\u0644\u0648\u062c\u06cc \u0627\u0646\u0633\u0627\u0646\u06cc \u0632\u0646\u062f\u06af\u06cc \u06a9\u0648 \u0628\u06c1\u062a\u0631 \u0628\u0646\u0627\u062a\u06cc \u06c1\u06d2"
+        },
+        {
+            "Source (English)": "hard work leads to success",
+            "Reference (Urdu)": "\u0645\u062d\u0646\u062a \u06a9\u0627\u0645\u06cc\u0627\u0628\u06cc \u06a9\u06cc \u0637\u0631\u0641 \u0644\u06d2 \u062c\u0627\u062a\u06cc \u06c1\u06d2",
+            "Model 1 (Ours - Beam k=4)": "\u0645\u062d\u0646\u062a \u06a9\u0627\u0645\u06cc\u0627\u0628\u06cc \u0644\u06d2 \u062c\u0627\u062a\u06cc \u06c1\u06d2",
+            "Model 2 (MarianMT)": "\u0645\u062d\u0646\u062a \u0627\u0646\u0633\u0627\u0646 \u06a9\u0648 \u06a9\u0627\u0645\u06cc\u0627\u0628\u06cc \u06a9\u06cc \u0637\u0631\u0641 \u0644\u06d2 \u062c\u0627\u062a\u06cc \u06c1\u06d2"
+        },
+        {
+            "Source (English)": "knowledge is power",
+            "Reference (Urdu)": "\u0639\u0644\u0645 \u0637\u0627\u0642\u062a \u06c1\u06d2",
+            "Model 1 (Ours - Beam k=4)": "\u0639\u0644\u0645 \u0637\u0627\u0642\u062a \u06c1\u06d2",
+            "Model 2 (MarianMT)": "\u0639\u0644\u0645 \u0627\u06cc\u06a9 \u0637\u0627\u0642\u062a \u06c1\u06d2"
+        }
+    ]
+}
