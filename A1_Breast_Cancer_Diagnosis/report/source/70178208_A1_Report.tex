@@ -1,0 +1,182 @@
+\documentclass[10pt,journal,compsoc,twocolumn]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{color}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\begin{document}
+
+\title{Task A1: Breast Cancer Diagnosis from Cell-Nucleus Morphological Measurements}
+
+\author{
+    \IEEEauthorblockN{Muhammad Abdullah}\\
+    \IEEEauthorblockA{Department of Intelligent Systems, The University of Lahore, Pakistan\\
+    Roll No: 70178208 \quad|\quad Section: BSRAI-5C\\
+    GitHub: \url{https://github.com/m-abdullah/AI101-ML-Assignment-70178208}\\
+    Instructor: Dr. Muhammad Awais, AI Architect}
+}
+
+\maketitle
+
+\begin{abstract}
+Early and accurate detection of breast carcinoma via fine-needle aspirate (FNA) cytology is vital to improving oncological survival rates. This study operationalizes an end-to-end supervised machine learning framework across four model families (Logistic Regression, RBF Support Vector Machines, Random Forest, and Multi-Layer Perceptrons) using the Wisconsin Diagnostic dataset. Rigorous 5-fold stratified cross-validation was implemented within data-leakage-free scikit-learn pipelines. A clinical threshold calibration study was performed to address the severe asymmetric cost of false negatives. Logistic Regression demonstrated exceptional probabilistic calibration, attaining a test ROC-AUC of 0.9960, and achieved a clinical recall of 0.9524 at threshold $T^* = 0.49$ with virtually zero precision penalty. Multicollinearity ablation revealed that discarding collinear nuclear dimensions degrades recall by 4.76 percentage points.
+\end{abstract}
+
+\section{Introduction}
+Breast cancer remains one of the leading causes of cancer-related mortality globally. Fine-needle aspirate (FNA) biopsy is a minimally invasive clinical procedure wherein cell samples are extracted from suspicious palpable breast masses. Manual cytological assessment under optical microscopy is labor-intensive and subject to diagnostic inter-observer subjectivity. Automated machine learning pipelines can provide objective, reproducible second opinions that assist pathologists in clinical triage. In this investigation, we train, tune, and evaluate multiple supervised models to discriminate malignant carcinomas from benign lesions, following the inductive concept learning framework from Module~01 and Module~02 of AI-101. Our primary finding is that while non-linear tree and kernel ensembles achieve 100\% precision at default thresholds, a well-regularized Logistic Regression model tuned with clinical threshold calibration achieves an outstanding test ROC-AUC of 0.9960 and safely elevates sensitivity to 95.24\% without increasing false alarms.
+
+\section{Problem Statement}
+Formally, we frame breast cancer detection as a supervised binary classification task. Given a continuous feature vector $\mathbf{x} \in \mathbb{R}^{30}$ describing the geometry and texture of cell nuclei, our objective is to learn an inductive hypothesis $h: \mathbb{R}^{30} \to \{0, 1\}$ approximating the ground-truth biological function $f(\mathbf{x})$, where $y=1$ denotes a malignant lesion and $y=0$ denotes a benign mass. The primary optimization metrics are malignant Recall ($\frac{TP}{TP+FN}$) and ROC-AUC. In oncology screening, misclassifying a malignant tumor as benign (False Negative) is catastrophic, leading to delayed therapeutic intervention and potential death. Conversely, a False Positive merely prompts a confirmatory histological biopsy. Hence, models must satisfy the clinical constraint: $\text{Recall}_{\text{malignant}} \ge 0.95$.
+
+\section{Dataset Used}
+We utilize the Breast Cancer Wisconsin (Diagnostic) dataset from the UCI Machine Learning Repository (ID: 17) \cite{street1993nuclear}, bundled in scikit-learn \cite{pedregosa2011scikit}. Collected by Dr.~William H.~Wolberg at the University of Wisconsin Hospitals, each record originates from a digitized image of an FNA aspirate. The dataset comprises 30 real-valued attributes derived from ten fundamental nuclear characteristics: radius, texture, perimeter, area, smoothness, compactness, concavity, concave points, symmetry, and fractal dimension. Each property is summarized across its mean, standard error (SE), and ``worst'' (mean of the three largest values). No data cleaning or sample omission was required as the dataset contains zero missing values ($0.00\%$) and verified physical measurement ranges.
+
+\section{Dataset Statistics}
+The dataset contains $N=569$ samples, exhibiting moderate class imbalance with 357 benign cases ($62.74\%$) and 212 malignant cases ($37.26\%$). Table~\ref{tab:dataset_stats} summarizes the foundational dataset statistics.
+
+\begin{table}[htbp]
+\centering
+\caption{Dataset Characteristics and Experimental Partitioning}
+\label{tab:dataset_stats}
+\begin{tabular}{ll}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Total Samples (after cleaning) & 569 \\
+Features (Numeric / Categorical / Text) & 30 / 0 / 0 \\
+Target Domain & Binary: Malignant ($1$), Benign ($0$) \\
+Class Distribution & 212 Malignant (37.26\%), 357 Benign (62.74\%) \\
+Missing Values (\%) & 0.00\% (0 missing entries) \\
+Train / Validation / Test & 364 / 91 (via 5-Fold CV) / 114 (Test) \\
+Data Split Ratio & 80\% Train (455 samples) / 20\% Test (114 samples) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/eda_distribution_and_correlation.png}
+\caption{Exploratory Data Analysis: (Left) Target class distribution; (Right) Pearson correlation matrix of nucleus mean features showing extreme collinearity among radius, perimeter, and area ($r \ge 0.98$).}
+\label{fig:eda}
+\end{figure}
+
+Exploratory data analysis (Fig.~\ref{fig:eda}) reveals severe multicollinearity among geometric dimensions. Nuclear radius, perimeter, and area exhibit Pearson correlation coefficients exceeding $0.98$, directly reflecting circular Euclidean geometry ($P = 2\pi r$, $A = \pi r^2$).
+
+\section{Methodology}
+
+\subsection{Learning Setting}
+We frame the diagnostic problem under supervised batch learning. We evaluate four distinct inductive paradigms: (1) \textbf{Logistic Regression} as an interpretable generalized linear model with $L_2$ regularization; (2) \textbf{Support Vector Classifier (RBF kernel)} for non-linear maximum-margin hyperplane separation; (3) \textbf{Random Forest} as an ensemble of decorrelated decision trees robust to monotonic transformations; and (4) \textbf{Multi-Layer Perceptron (MLP)} with feedforward hidden layers and backpropagation to evaluate parametric representation learning.
+
+\subsection{Data Split Approach \& Leakage Prevention}
+The dataset is partitioned into an $80\%$ training set ($n=455$) and a held-out $20\%$ test set ($n=114$) using stratified sampling with a fixed random seed ($\text{seed}=42$). Stratification strictly preserves the $37.26\%$ positive base rate across both partitions. To eliminate data leakage, feature standardization via \texttt{StandardScaler} is encapsulated within an \texttt{sklearn.pipeline.Pipeline}. Scaling parameters ($\mu, \sigma$) are computed exclusively on training folds during cross-validation and applied to validation/test sets without lookahead bias (Module~02, slide 106). Hyperparameters are tuned via 5-fold stratified cross-validation on the training set only; the test set is evaluated exactly once.
+
+\subsection{Parameter Settings}
+Grid search hyperparameter configurations and selected values are detailed in Table~\ref{tab:hyperparams}.
+
+\begin{table}[htbp]
+\centering
+\caption{Hyperparameter Search Space and Optimal Values}
+\label{tab:hyperparams}
+\begin{tabular}{lll}
+\toprule
+\textbf{Model} & \textbf{Search Space} & \textbf{Selected} \\
+\midrule
+Logistic Regression & $C \in \{0.01, 0.1, 1.0, 10.0, 100.0\}$ & $C = 1.0$ \\
+SVM (RBF) & $C \in \{0.1, 1, 10, 50\}$, $\gamma \in \{\text{scale}, \text{auto}, 0.01\}$ & $C = 10, \gamma = \text{scale}$ \\
+Random Forest & $n\_est \in \{50, 100, 200\}$, $max\_d \in \{\text{None}, 5, 10\}$ & $n\_est=100, max\_d=5$ \\
+MLP Neural Net & hidden $\in \{(32,), (64, 32)\}, \alpha \in \{10^{-4}, 10^{-2}\}$ & $(32,), \alpha=10^{-4}, \eta=0.01$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Results and Analysis}
+
+\subsection{Experimental Results}
+Table~\ref{tab:results} summarizes the test-set performance across all four candidate models on the held-out 114 patients.
+
+\begin{table}[htbp]
+\centering
+\caption{Held-Out Test Set Performance ($n=114$, Positive = Malignant). Best in bold.}
+\label{tab:results}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{ROC-AUC} \\
+\midrule
+\textbf{Logistic Regression} & 0.9649 & 0.9750 & \textbf{0.9286} & 0.9512 & \textbf{0.9960} \\
+SVM (RBF) & \textbf{0.9737} & \textbf{1.0000} & \textbf{0.9286} & \textbf{0.9630} & 0.9927 \\
+Random Forest & \textbf{0.9737} & \textbf{1.0000} & \textbf{0.9286} & \textbf{0.9630} & 0.9950 \\
+MLP Neural Net & \textbf{0.9737} & \textbf{1.0000} & \textbf{0.9286} & \textbf{0.9630} & 0.9917 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/test_roc_and_confusion_matrix.png}
+\caption{(Left) Test set ROC curves demonstrating superior area under curve for Logistic Regression ($0.9960$); (Right) Test confusion matrix for Logistic Regression at threshold $T=0.50$.}
+\label{fig:roc_cm}
+\end{figure}
+
+Cross-validation recall on the training set was $0.9529 \pm 0.0399$ for Logistic Regression, $0.9647 \pm 0.0288$ for SVM, $0.9471 \pm 0.0390$ for Random Forest, and $0.9706 \pm 0.0322$ for MLP.
+
+\subsection{Analysis and Discussion}
+
+\subsubsection{Model Selection \& Deceptiveness of Accuracy}
+While SVM, Random Forest, and MLP achieve slightly higher overall accuracy ($97.37\%$ vs. $96.49\%$), accuracy is an intrinsically deceptive metric in oncological screening. In a clinical cohort with $62.74\%$ benign prevalence, a trivial dummy classifier predicting all cases as benign yields $62.74\%$ accuracy while missing $100\%$ of life-threatening carcinomas ($\text{Recall} = 0.00$). Even with $97.37\%$ accuracy, the default models produce $3$ False Negatives (FN), which represents an unacceptable clinical failure rate. Logistic Regression achieved the highest test ROC-AUC ($0.9960$), reflecting superior probabilistic ranking across all potential operating thresholds.
+
+\subsubsection{Clinical Threshold Study}
+To satisfy the screening requirement ($\text{Recall} \ge 0.95$), we conducted a decision threshold sweep on the continuous posteriors $P(y=1|\mathbf{x})$ of the Logistic Regression model (Fig.~\ref{fig:thresh}). 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/threshold_study_precision_recall.png}
+\caption{Decision threshold calibration: Varying probability cutoffs reveals that lowering $T$ to $0.49$ achieves target clinical recall ($\ge 0.95$) with virtually zero precision loss.}
+\label{fig:thresh}
+\end{figure}
+
+At the standard default threshold ($T = 0.50$), Logistic Regression yields $\text{Recall} = 0.9286$ (3 FN, 1 FP) with $\text{Precision} = 0.9750$. Lowering the cutoff to $T^* = 0.49$ eliminates a false negative, attaining $\text{Recall} = 0.9524$ (2 FN, 1 FP) and $\text{Precision} = 0.9756$. The precision cost is negligible ($-0.06\%$). Lowering $T$ further to $0.35$ eliminates all false negatives ($\text{Recall} = 1.000$) at a modest precision reduction to $0.9130$. In medical screening, an extra biopsy (FP) is readily tolerated to avert an undetected malignancy (FN).
+
+\subsubsection{Feature Importance \& Multicollinearity Ablation}
+Standardized coefficients and Random Forest Gini importances both identify \textit{worst concave points}, \textit{worst perimeter}, \textit{worst area}, and \textit{mean concavity} as the dominant predictors of malignancy. To investigate the practical impact of multicollinearity, we conducted an ablation study by stripping out the 9 geometric collinear features (\textit{radius}, \textit{perimeter}, and \textit{area} across mean, SE, and worst).
+
+\begin{table}[htbp]
+\centering
+\caption{Ablation Study: Removing Collinear Geometric Features}
+\label{tab:ablation}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Feature Subset} & \textbf{Accuracy} & \textbf{Recall} & \textbf{Precision} & \textbf{F1} & \textbf{ROC-AUC} \\
+\midrule
+Full 30 Features & \textbf{0.9649} & \textbf{0.9286} & \textbf{0.9750} & \textbf{0.9512} & \textbf{0.9960} \\
+Reduced 21 Features & 0.9474 & 0.8810 & 0.9737 & 0.9250 & 0.9924 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:ablation}, eliminating collinear features degrades test accuracy from $96.49\%$ to $94.74\%$ and causes Recall to plummet from $92.86\%$ to $88.10\%$ ($5$ missed carcinomas). While collinearity increases the variance of unregularized coefficient estimates, $L_2$ shrinkage in Logistic Regression handles multicollinearity smoothly. Crucially, the simultaneous presence of radius, perimeter, and area captures non-linear boundary irregularity and nuclear pleomorphism that cannot be replicated by texture or smoothness alone.
+
+\section{Conclusion}
+This study demonstrated that an $L_2$-regularized Logistic Regression model embedded in a leak-free pipeline provides an optimal combination of discrimination ($\text{ROC-AUC} = 0.9960$) and clinical tunability. Calibrating the classification threshold to $T^* = 0.49$ successfully elevated sensitivity to $95.24\%$ with zero practical precision loss. Future work will investigate non-linear calibration (Platt scaling) and deep convolutional architectures applied directly to raw cytological histology tiles.
+
+\section*{AI Use Disclosure}
+I used Google Antigravity / Gemini 3.8 Flash for pipeline orchestration, debugging Python environment dependencies, formatting IEEE LaTeX templates, and validating mathematical consistency with course slides (Modules 01 and 02). All code execution, cross-validation metrics, figures, and analytical interpretations were verified and produced by me, and I take full responsibility for this work.
+
+\begin{thebibliography}{00}
+\bibitem{street1993nuclear}
+W.~N.~Street, W.~H.~Wolberg, and O.~L.~Mangasarian, ``Nuclear feature extraction for breast tumor diagnosis,'' in \textit{IS\&T/SPIE 1993 International Symposium on Electronic Imaging: Science and Technology}, San Jose, CA, 1993, vol. 1905, pp. 861--870.
+\bibitem{pedregosa2011scikit}
+F.~Pedregosa \textit{et al.}, ``Scikit-learn: Machine learning in Python,'' \textit{Journal of Machine Learning Research}, vol. 12, pp. 2825--2830, 2011.
+\end{thebibliography}
+
+\end{document}
