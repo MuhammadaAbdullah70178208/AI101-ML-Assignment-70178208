@@ -1,0 +1,91 @@
+{
+    "benchmark_results": {
+        "CNN-LSTM (Greedy Decoding)": {
+            "BLEU_1": 58.4,
+            "BLEU_2": 38.6,
+            "BLEU_3": 24.5,
+            "BLEU_4": 15.2,
+            "Distinct_Vocab": 412
+        },
+        "CNN-LSTM (Beam Search k=3)": {
+            "BLEU_1": 61.2,
+            "BLEU_2": 41.8,
+            "BLEU_3": 27.9,
+            "BLEU_4": 18.5,
+            "Distinct_Vocab": 448
+        },
+        "CNN-LSTM (Beam Search k=5)": {
+            "BLEU_1": 63.5,
+            "BLEU_2": 44.1,
+            "BLEU_3": 30.2,
+            "BLEU_4": 20.8,
+            "Distinct_Vocab": 465
+        },
+        "ViT-GPT2 Vision-Transformer": {
+            "BLEU_1": 68.8,
+            "BLEU_2": 49.5,
+            "BLEU_3": 35.8,
+            "BLEU_4": 25.4,
+            "Distinct_Vocab": 620
+        }
+    },
+    "beam_width_study": {
+        "1": 15.2,
+        "3": 18.5,
+        "5": 20.8,
+        "8": 21.0
+    },
+    "training_history": {
+        "epochs": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+        ],
+        "train_loss": [
+            5.12,
+            4.35,
+            3.82,
+            3.39,
+            3.05,
+            2.78,
+            2.55,
+            2.36,
+            2.21,
+            2.08,
+            1.97,
+            1.88,
+            1.81,
+            1.75,
+            1.7
+        ],
+        "val_loss": [
+            5.2,
+            4.48,
+            3.99,
+            3.6,
+            3.32,
+            3.1,
+            2.95,
+            2.84,
+            2.76,
+            2.7,
+            2.66,
+            2.63,
+            2.61,
+            2.6,
+            2.6
+        ]
+    }
+}
