@@ -1,0 +1,84 @@
+{
+    "test_results": {
+        "Logistic Regression (Balanced)": {
+            "Accuracy": 0.9973333333333333,
+            "Precision": 0.9473684210526315,
+            "Recall": 1.0,
+            "F1": 0.972972972972973,
+            "PR-AUC": 1.0,
+            "ROC-AUC": 1.0,
+            "Tuned_Threshold": 0.24000000000000002,
+            "Confusion_Matrix": [
+                [
+                    712,
+                    2
+                ],
+                [
+                    0,
+                    36
+                ]
+            ]
+        },
+        "Linear SVM (Balanced)": {
+            "Accuracy": 1.0,
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "PR-AUC": 1.0,
+            "ROC-AUC": 1.0,
+            "Tuned_Threshold": 0.1,
+            "Confusion_Matrix": [
+                [
+                    714,
+                    0
+                ],
+                [
+                    0,
+                    36
+                ]
+            ]
+        },
+        "Random Forest (Balanced)": {
+            "Accuracy": 1.0,
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "PR-AUC": 1.0,
+            "ROC-AUC": 1.0,
+            "Tuned_Threshold": 0.1,
+            "Confusion_Matrix": [
+                [
+                    714,
+                    0
+                ],
+                [
+                    0,
+                    36
+                ]
+            ]
+        }
+    },
+    "ablation_results": {
+        "Structured-Only": {
+            "Precision": 0.8,
+            "Recall": 1.0,
+            "F1": 0.8888888888888888,
+            "PR-AUC": 1.0,
+            "ROC-AUC": 1.0
+        },
+        "Text-Only": {
+            "Precision": 1.0,
+            "Recall": 1.0,
+            "F1": 1.0,
+            "PR-AUC": 1.0,
+            "ROC-AUC": 1.0
+        },
+        "Combined (Structured + Text)": {
+            "Precision": 0.9473684210526315,
+            "Recall": 1.0,
+            "F1": 0.972972972972973,
+            "PR-AUC": 1.0,
+            "ROC-AUC": 1.0
+        }
+    }
+}
