@@ -1,0 +1,150 @@
+{
+    "cv_results": {
+        "Logistic Regression": {
+            "best_params": {
+                "clf__C": 1.0
+            },
+            "cv_recall_mean": 0.9529411764705882,
+            "cv_recall_std": 0.03989605872426629,
+            "cv_auc_mean": 0.9957688338493291,
+            "cv_auc_std": 0.004665698474904977
+        },
+        "SVM (RBF)": {
+            "best_params": {
+                "clf__C": 10.0,
+                "clf__gamma": "scale"
+            },
+            "cv_recall_mean": 0.9647058823529411,
+            "cv_recall_std": 0.028817526385684453,
+            "cv_auc_mean": 0.993498452012384,
+            "cv_auc_std": 0.005888686323090673
+        },
+        "Random Forest": {
+            "best_params": {
+                "clf__max_depth": 5,
+                "clf__min_samples_split": 2,
+                "clf__n_estimators": 100
+            },
+            "cv_recall_mean": 0.9470588235294117,
+            "cv_recall_std": 0.03901911518065177,
+            "cv_auc_mean": 0.9882352941176471,
+            "cv_auc_std": 0.007787265007188262
+        },
+        "MLP Neural Net": {
+            "best_params": {
+                "clf__alpha": 0.0001,
+                "clf__hidden_layer_sizes": [
+                    32
+                ],
+                "clf__learning_rate_init": 0.01
+            },
+            "cv_recall_mean": 0.9705882352941175,
+            "cv_recall_std": 0.032218973970892135,
+            "cv_auc_mean": 0.9946336429308567,
+            "cv_auc_std": 0.006022801428860602
+        }
+    },
+    "test_metrics": {
+        "Logistic Regression": {
+            "Accuracy": 0.9649122807017544,
+            "Precision": 0.975,
+            "Recall": 0.9285714285714286,
+            "F1": 0.9512195121951219,
+            "ROC-AUC": 0.996031746031746,
+            "Confusion_Matrix": [
+                [
+                    71,
+                    1
+                ],
+                [
+                    3,
+                    39
+                ]
+            ]
+        },
+        "SVM (RBF)": {
+            "Accuracy": 0.9736842105263158,
+            "Precision": 1.0,
+            "Recall": 0.9285714285714286,
+            "F1": 0.9629629629629629,
+            "ROC-AUC": 0.9927248677248677,
+            "Confusion_Matrix": [
+                [
+                    72,
+                    0
+                ],
+                [
+                    3,
+                    39
+                ]
+            ]
+        },
+        "Random Forest": {
+            "Accuracy": 0.9736842105263158,
+            "Precision": 1.0,
+            "Recall": 0.9285714285714286,
+            "F1": 0.9629629629629629,
+            "ROC-AUC": 0.9950396825396824,
+            "Confusion_Matrix": [
+                [
+                    72,
+                    0
+                ],
+                [
+                    3,
+                    39
+                ]
+            ]
+        },
+        "MLP Neural Net": {
+            "Accuracy": 0.9736842105263158,
+            "Precision": 1.0,
+            "Recall": 0.9285714285714286,
+            "F1": 0.9629629629629629,
+            "ROC-AUC": 0.9917328042328042,
+            "Confusion_Matrix": [
+                [
+                    72,
+                    0
+                ],
+                [
+                    3,
+                    39
+                ]
+            ]
+        }
+    },
+    "threshold_study": {
+        "default": {
+            "threshold": 0.5,
+            "recall": 0.9285714285714286,
+            "precision": 0.975,
+            "fn": 3,
+            "fp": 1
+        },
+        "adjusted": {
+            "threshold": 0.4851515151515151,
+            "recall": 0.9523809523809523,
+            "precision": 0.975609756097561,
+            "fn": 2,
+            "fp": 1
+        },
+        "precision_cost": -0.0006097560975609762
+    },
+    "multicollinearity_ablation": {
+        "full_30_features": {
+            "accuracy": 0.9649122807017544,
+            "recall": 0.9285714285714286,
+            "precision": 0.975,
+            "f1": 0.9512195121951219,
+            "roc_auc": 0.996031746031746
+        },
+        "reduced_21_features": {
+            "accuracy": 0.9473684210526315,
+            "recall": 0.8809523809523809,
+            "precision": 0.9736842105263158,
+            "f1": 0.925,
+            "roc_auc": 0.9923941798941799
+        }
+    }
+}
