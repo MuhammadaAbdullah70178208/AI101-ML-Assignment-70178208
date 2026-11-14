@@ -69,7 +69,7 @@ AI101-ML-Assignment-70178208/
 ## How to Reproduce and Run
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/m-abdullah/AI101-ML-Assignment-70178208.git
+   git clone https://github.com/MuhammadaAbdullah70178208/AI101-ML-Assignment-70178208.git
    cd AI101-ML-Assignment-70178208
    ```
 
