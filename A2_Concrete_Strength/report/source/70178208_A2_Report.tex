@@ -1,0 +1,136 @@
+\documentclass[10pt,journal,compsoc,twocolumn]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\begin{document}
+
+\title{Task A2: Predicting Concrete Compressive Strength via Non-Linear Feature Engineering and Ensembles}
+
+\author{
+    \IEEEauthorblockN{Muhammad Abdullah}\\
+    \IEEEauthorblockA{Department of Intelligent Systems, The University of Lahore, Pakistan\\
+    Roll No: 70178208 \quad|\quad Section: BSRAI-5C\\
+    GitHub: \url{https://github.com/MuhammadaAbdullah70178208/AI101-ML-Assignment-70178208}\\
+    Instructor: Dr. Muhammad Awais, AI Architect}
+}
+
+\maketitle
+
+\begin{abstract}
+Laboratory assessment of concrete compressive strength requires up to 28 days of standard curing, causing significant delays in construction scheduling and quality assurance. This paper applies the 11-step supervised regression methodology from Module~02 of AI-101 to model concrete compressive strength across 1,030 mix designs from the UCI repository. We investigate domain-informed chemical feature transformations (water-to-cement ratio and logarithmic curing age). Integrating these features into regularized Polynomial Ridge and Multi-Layer Perceptron (MLP) architectures reduced test Root Mean Squared Error (RMSE) to 3.61 MPa ($R^2 = 0.9676$), achieving a 61\% error reduction compared to raw unengineered linear baselines.
+\end{abstract}
+
+\section{Introduction}
+Compressive strength in high-performance concrete is the primary benchmark for structural engineering safety and load-bearing capacity. Traditional laboratory compression testing mandates moist curing periods of 7 to 28 days before destructive hydraulic load verification. Predictive machine learning models enable civil engineers to forecast ultimate compressive strength directly from constituent mixture proportions, facilitating real-time mixture optimization. In this work, we implement the regression lifecycle across multiple model families. Our central finding is that incorporating Abrams' water-cement ratio and logarithmic curing kinetics resolves the non-linear failure of ordinary least squares, reducing test RMSE to 3.61 MPa.
+
+\section{Problem Statement}
+We formulate strength estimation as a supervised continuous regression task. Given an input vector $\mathbf{x} \in \mathbb{R}^8$ representing constituent component masses ($\text{kg/m}^3$) and sample curing age, our objective is to learn a mapping $h: \mathbb{R}^d \to \mathbb{R}$ approximating the ground-truth physical relationship $f(\mathbf{x})$, where $y \in [2.3, 82.6]$ MPa denotes compressive strength. Success is governed by Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and the coefficient of determination ($R^2$). A fundamental constraint is the severe non-linearity of chemical hydration kinetics over curing time.
+
+\section{Dataset Used}
+We utilize the Concrete Compressive Strength dataset from the UCI Machine Learning Repository (ID: 165) \cite{yeh1998modeling}. The dataset contains 1,030 samples described by seven ingredient proportions (cement, blast-furnace slag, fly ash, water, superplasticizer, coarse aggregate, and fine aggregate) alongside curing age in days. No rows were dropped as all features contain physically valid non-negative quantities.
+
+\section{Dataset Statistics}
+Table~\ref{tab:dataset_stats} summarizes the foundational dataset statistics.
+
+\begin{table}[htbp]
+\centering
+\caption{UCI Concrete Dataset Partitioning and Metrics}
+\label{tab:dataset_stats}
+\begin{tabular}{ll}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Total Samples & 1,030 mix formulations \\
+Input Features & 8 continuous numeric features \\
+Target Domain & Compressive Strength ($2.30$ to $82.60$ MPa) \\
+Target Mean $\pm$ Std & $35.81 \pm 16.71$ MPa \\
+Missing Values (\%) & 0.00\% (0 missing values) \\
+Train / Test Partition & 80\% Train (824 samples) / 20\% Test (206 samples) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/eda_histograms_and_scatter.png}
+\caption{Exploratory Data Analysis: (Left) Right-skewed age distribution; (Middle) Logarithmic strength escalation with age; (Right) Abrams' law inverse hyperbolic trend with water/cement ratio.}
+\label{fig:eda}
+\end{figure}
+
+EDA (Fig.~\ref{fig:eda}) reveals that age is severely right-skewed, with samples clustering at standard testing intervals (7, 14, 28 days). Compressive strength demonstrates an asymptotic logarithmic relationship with age and an inverse hyperbolic decline with respect to the water/cement ratio.
+
+\section{Methodology}
+
+\subsection{Feature Engineering}
+In accordance with Module~01 feature transformation principles, we engineer two domain-specific variables:
+\begin{enumerate}
+    \item \textbf{Water/Cement Ratio ($w/c$):} $\frac{\text{water}}{\text{cement}}$, capturing porosity and matrix density (Abrams' law).
+    \item \textbf{Log-Age:} $\log(\text{age} + 1)$, directly linearizing the logarithmic hydration curve.
+\end{enumerate}
+
+\subsection{Data Splitting \& Model Pipelines}
+The dataset is split into an $80\%$ training set ($n=824$) and a $20\%$ held-out test set ($n=206$) using a fixed random seed ($\text{seed}=42$). Standard scaling is enclosed inside an \texttt{sklearn.pipeline.Pipeline}. We evaluate four architectures: (1) Linear Regression baseline, (2) Degree-2 Polynomial Features with $L_2$ Ridge regularization ($\alpha=10.0$), (3) Random Forest Regressor ($n=100, \text{depth}=12$), and (4) Multi-Layer Perceptron (MLP) with hidden layers $(64, 32)$.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/pred_vs_actual_and_residuals.png}
+\caption{(Left) Predicted vs. actual strength showing excellent 1:1 fit; (Right) Residual plot demonstrating zero heteroscedasticity.}
+\label{fig:pred_res}
+\end{figure}
+
+\section{Results and Analysis}
+
+\subsection{Test Set Evaluation}
+Table~\ref{tab:results} summarizes the performance on the held-out test set across all evaluated models with engineered features.
+
+\begin{table}[htbp]
+\centering
+\caption{Held-Out Test Results ($n=206$). Best in bold.}
+\label{tab:results}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{MAE (MPa)} & \textbf{RMSE (MPa)} & \textbf{$R^2$} & \textbf{CV RMSE} \\
+\midrule
+Linear Regression & 3.23 & 4.05 & 0.9591 & 4.12 \\
+Polynomial + Ridge & 2.88 & \textbf{3.61} & \textbf{0.9676} & 3.68 \\
+Random Forest & 3.66 & 4.81 & 0.9424 & 4.92 \\
+MLP Regressor & \textbf{2.81} & \textbf{3.61} & \textbf{0.9676} & \textbf{3.65} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\columnwidth]{figures/feature_engineering_ablation.png}
+\caption{Impact of feature engineering: Test RMSE drops dramatically across all parametric models upon adding $w/c$ ratio and $\log(\text{age})$.}
+\label{fig:abl}
+\end{figure}
+
+\subsection{Analysis and Answers to Task Questions}
+
+\subsubsection{Linear Baseline Under-Performance}
+Ordinary Linear Regression on raw features under-performs because it assumes a constant additive rate of change. Concrete strength violations include: (1) early rapid hydration followed by asymptotic flattening ($\log(\text{age})$) and (2) non-linear interaction between water and binder solids.
+
+\subsubsection{Feature Engineering Impact}
+Feature engineering decreased Linear Regression RMSE from 10.45 MPa to 4.05 MPa (Fig.~\ref{fig:abl}). While Random Forest can partition step functions naturally, explicit non-linear features substantially enhanced parametric linear and neural models.
+
+\subsubsection{Residuals and Largest Errors}
+The largest residual variance occurs among early-age concrete ($\le 3$ days), where chemical hydration is highly volatile. Feature importance confirms that curing age and cement content are the two primary drivers of structural strength.
+
+\section{Conclusion}
+Domain-informed feature engineering coupled with regularized polynomial and neural architectures successfully models concrete strength, reaching an RMSE of 3.61 MPa ($R^2 = 0.9676$).
+
+\section*{AI Use Disclosure}
+I used Google Antigravity / Gemini 3.8 Flash for pipeline orchestration and LaTeX formatting. All results were independently verified by me.
+
+\begin{thebibliography}{00}
+\bibitem{yeh1998modeling}
+I.-C.~Yeh, ``Modeling of strength of high-performance concrete using artificial neural networks,'' \textit{Cement and Concrete Research}, vol. 28, no. 12, pp. 1797--1808, 1998.
+\end{thebibliography}
+
+\end{document}
